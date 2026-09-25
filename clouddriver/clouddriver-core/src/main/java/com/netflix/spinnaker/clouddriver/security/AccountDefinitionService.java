@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -49,6 +50,7 @@ public class AccountDefinitionService {
   private final AccountCredentialsProvider accountCredentialsProvider;
   private final AccountSecurityPolicy policy;
   private final List<AuthorizedRolesExtractor> extractors;
+  private final Optional<FiatAccountDefinitionPublisher> fiatPublisher;
 
   /**
    * Lists accounts by type that the current user has {@link Authorization#WRITE} access. Users who
@@ -76,6 +78,7 @@ public class AccountDefinitionService {
     }
     validateAccountWritePermissions(username, definition, AccountAction.CREATE);
     repository.create(definition);
+    fiatPublisher.ifPresent(publisher -> publisher.saved(definition));
     return definition;
   }
 
@@ -90,6 +93,7 @@ public class AccountDefinitionService {
     }
     validateAccountWritePermissions(username, definition, AccountAction.SAVE);
     repository.save(definition);
+    fiatPublisher.ifPresent(publisher -> publisher.saved(definition));
     return definition;
   }
 
@@ -103,12 +107,14 @@ public class AccountDefinitionService {
     String username = AuthenticatedRequest.getSpinnakerUser().orElse("anonymous");
     validateAccountWritePermissions(username, definition, AccountAction.UPDATE);
     repository.update(definition);
+    fiatPublisher.ifPresent(publisher -> publisher.saved(definition));
     return definition;
   }
 
   @PreAuthorize("@accountSecurity.canModifyAccount(authentication.name, #accountName)")
   public void deleteAccount(String accountName) {
     repository.delete(accountName);
+    fiatPublisher.ifPresent(publisher -> publisher.deleted(accountName));
   }
 
   /**

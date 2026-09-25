@@ -1,0 +1,57 @@
+/*
+ * Copyright 2026 Apple, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Store-backed Fiat: backs Fiat's PermissionsRepository with the kork-zanzibar relationship store,
+// selected by config. Other services keep calling Fiat through fiat-api.
+
+dependencies {
+  implementation project(":fiat-core")
+  implementation project(":fiat-roles")
+
+  implementation "io.spinnaker.kork:kork-zanzibar"
+  implementation "io.spinnaker.kork:kork-exceptions"
+  implementation "org.apache.logging.log4j:log4j-api"
+
+  implementation "org.springframework:spring-context"
+  implementation "org.springframework:spring-web"
+  implementation "org.springframework.boot:spring-boot-autoconfigure"
+
+  compileOnly "org.projectlombok:lombok"
+  annotationProcessor "org.projectlombok:lombok"
+
+  testImplementation "org.junit.jupiter:junit-jupiter"
+  testImplementation "org.assertj:assertj-core"
+  testImplementation "org.mockito:mockito-core"
+  testImplementation "org.testcontainers:testcontainers"
+  testImplementation "org.testcontainers:junit-jupiter"
+  testImplementation testFixtures(project(":fiat-core"))
+}
+
+test {
+  useJUnitPlatform()
+  testLogging {
+    showStandardStreams = true
+  }
+  // Forward -Dfiat.zanzibar.* (ZanzibarViewBenchmark gate + scale knobs) to the forked test JVM.
+  providers.systemPropertiesPrefixedBy("fiat.zanzibar.").get().each { name, value ->
+    systemProperty(name, value)
+  }
+  // -Dfiat.zanzibar.bench.heap sets -Xmx on the fork (the daemon's jvmargs do not reach it).
+  def benchHeap = providers.systemProperty("fiat.zanzibar.bench.heap").getOrNull()
+  if (benchHeap) {
+    maxHeapSize = benchHeap
+  }
+}

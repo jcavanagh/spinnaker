@@ -31,7 +31,8 @@ include 'fiat-api',
         'fiat-sql',
         'fiat-sql-mysql',
         'fiat-sql-postgres',
-        'fiat-web'
+        'fiat-web',
+        'fiat-zanzibar'
 
 def setBuildFile(project) {
   project.buildFileName = "${project.name}.gradle"

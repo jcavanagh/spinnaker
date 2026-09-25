@@ -17,3 +17,6 @@ databaseChangeLog:
   - include:
       file: changelog/20220727-resource-name-to-lower-case.yml
       relativeToChangelogFile: true
+  - include:
+      file: changelog/20261002-zanzibar-consistency-token.yml
+      relativeToChangelogFile: true

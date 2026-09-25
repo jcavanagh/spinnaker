@@ -26,6 +26,7 @@ dependencies {
   implementation project(':fiat-core')
   implementation project(':fiat-roles')
   implementation project(':fiat-sql')
+  implementation project(':fiat-zanzibar')
 
   if (!rootProject.hasProperty("excludeSqlDrivers")) {
     runtimeOnly(project(":fiat-sql-mysql"))
@@ -38,6 +39,7 @@ dependencies {
   }
 
   testImplementation "io.spinnaker.kork:kork-jedis"
+  testImplementation "io.spinnaker.kork:kork-zanzibar"
   testImplementation "org.testcontainers:testcontainers"
 
   testImplementation "io.spinnaker.kork:kork-sql-test"

@@ -18,6 +18,7 @@ package com.netflix.spinnaker.front50;
 
 import com.netflix.spinnaker.fiat.shared.FiatClientConfigurationProperties;
 import com.netflix.spinnaker.fiat.shared.FiatPermissionEvaluator;
+import com.netflix.spinnaker.fiat.shared.FiatResourceEvents;
 import com.netflix.spinnaker.fiat.shared.FiatService;
 import com.netflix.spinnaker.front50.config.FiatConfigurationProperties;
 import com.netflix.spinnaker.front50.config.annotations.ConditionalOnAnyProviderExceptRedisIsEnabled;
@@ -43,24 +44,28 @@ import org.springframework.stereotype.Service;
 public class ServiceAccountsService {
   private static final Logger log = LoggerFactory.getLogger(ServiceAccountsService.class);
   private static final String MANAGED_SERVICE_ACCOUNT_SUFFIX = "@managed-service-account";
+  private static final String SERVICE_ACCOUNT = "service_account";
 
   private final ServiceAccountDAO serviceAccountDAO;
   private final Optional<FiatService> fiatService;
   private final FiatClientConfigurationProperties fiatClientConfigurationProperties;
   private final FiatConfigurationProperties fiatConfigurationProperties;
   private final FiatPermissionEvaluator fiatPermissionEvaluator;
+  private final Optional<FiatResourceEvents> fiatResourceEvents;
 
   public ServiceAccountsService(
       ServiceAccountDAO serviceAccountDAO,
       Optional<FiatService> fiatService,
       FiatClientConfigurationProperties fiatClientConfigurationProperties,
       FiatConfigurationProperties fiatConfigurationProperties,
-      FiatPermissionEvaluator fiatPermissionEvaluator) {
+      FiatPermissionEvaluator fiatPermissionEvaluator,
+      Optional<FiatResourceEvents> fiatResourceEvents) {
     this.serviceAccountDAO = serviceAccountDAO;
     this.fiatService = fiatService;
     this.fiatClientConfigurationProperties = fiatClientConfigurationProperties;
     this.fiatConfigurationProperties = fiatConfigurationProperties;
     this.fiatPermissionEvaluator = fiatPermissionEvaluator;
+    this.fiatResourceEvents = fiatResourceEvents;
   }
 
   public Collection<ServiceAccount> getAllServiceAccounts() {
@@ -74,6 +79,7 @@ public class ServiceAccountsService {
     } else {
       syncUsers(Collections.singletonList(acct));
     }
+    fiatResourceEvents.ifPresent(e -> e.changed(SERVICE_ACCOUNT, List.of(acct)));
     return acct;
   }
 
@@ -87,6 +93,7 @@ public class ServiceAccountsService {
         sa -> {
           try {
             serviceAccountDAO.delete(sa.getId());
+            fiatResourceEvents.ifPresent(e -> e.deleted(SERVICE_ACCOUNT, List.of(sa.getId())));
             fiatService.ifPresent(
                 service -> Retrofit2SyncCall.execute(service.logoutUser(sa.getId())));
           } catch (Exception e) {

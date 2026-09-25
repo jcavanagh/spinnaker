@@ -1,0 +1,69 @@
+/*
+ * Copyright 2026 Apple, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.netflix.spinnaker.fiat.zanzibar.resource;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.netflix.spinnaker.fiat.model.resources.Account;
+import com.netflix.spinnaker.fiat.model.resources.Application;
+import com.netflix.spinnaker.fiat.model.resources.BuildService;
+import com.netflix.spinnaker.fiat.permissions.FallbackPermissionsResolver;
+import com.netflix.spinnaker.fiat.providers.ResourcePermissionProvider;
+import com.netflix.spinnaker.fiat.providers.ResourceProvider;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Bean;
+
+/** One {@link ZanzibarResourceType} bean per type the store holds. */
+@AutoConfiguration
+@ConditionalOnProperty(prefix = "fiat.zanzibar", name = "enabled", havingValue = "true")
+public class FiatZanzibarTypesConfig {
+
+  @Bean
+  public AccountResourceType zanzibarAccountType(
+      ResourcePermissionProvider<Account> permissions,
+      ObjectProvider<ResourceProvider<Account>> accounts,
+      ObjectMapper objectMapper) {
+    return new AccountResourceType(permissions, accounts.getIfAvailable(), objectMapper);
+  }
+
+  @Bean
+  public ApplicationResourceType zanzibarApplicationType(
+      ResourcePermissionProvider<Application> permissions,
+      ObjectProvider<ResourceProvider<Application>> applications,
+      ObjectMapper objectMapper,
+      @Qualifier("executeFallbackPermissionsResolver") FallbackPermissionsResolver executeFallback,
+      @Value("${fiat.allow-access-to-unknown-applications:false}")
+          boolean allowAccessToUnknownApplications) {
+    return new ApplicationResourceType(
+        permissions,
+        applications.getIfAvailable(),
+        objectMapper,
+        executeFallback,
+        allowAccessToUnknownApplications);
+  }
+
+  @Bean
+  public BuildServiceResourceType zanzibarBuildServiceType(
+      ResourcePermissionProvider<BuildService> permissions,
+      ObjectProvider<ResourceProvider<BuildService>> buildServices,
+      ObjectMapper objectMapper) {
+    return new BuildServiceResourceType(permissions, buildServices.getIfAvailable(), objectMapper);
+  }
+}

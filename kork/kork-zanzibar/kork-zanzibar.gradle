@@ -1,0 +1,68 @@
+/*
+ * Copyright 2026 Apple, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Store-backed authorization: a relationship-store decision layer (SpiceDB or OpenFGA) behind one
+// ZanzibarStore interface. Consumed by fiat-zanzibar, which backs Fiat's PermissionsRepository with it.
+
+dependencies {
+  api platform(project(':spinnaker-dependencies'))
+
+  // Authorization is the action vocabulary of the store API.
+  api project(':kork-security')
+
+  // kork-core supplies the distributed LockManager the reconcile lock binds to across instances.
+  implementation project(':kork-core')
+
+  // --- Engine clients ---------------------------------------------------------
+  // `api` so consumers that instantiate the adapters (e.g. Fiat) get them at runtime.
+  api 'dev.openfga:openfga-sdk:0.10.1'
+  api 'com.authzed.api:authzed:1.6.0'
+  api 'io.grpc:grpc-netty-shaded:1.62.2'
+  api 'io.grpc:grpc-stub:1.62.2'
+  api 'io.grpc:grpc-protobuf:1.62.2'
+  // ---------------------------------------------------------------------------
+
+  implementation 'com.fasterxml.jackson.core:jackson-databind'
+  implementation 'com.google.guava:guava'
+  implementation 'org.apache.logging.log4j:log4j-api'
+
+  compileOnly 'org.projectlombok:lombok'
+  annotationProcessor 'org.projectlombok:lombok'
+
+  testImplementation 'org.junit.jupiter:junit-jupiter'
+  testImplementation 'org.testcontainers:testcontainers'
+  testImplementation 'org.testcontainers:junit-jupiter'
+  testImplementation 'org.assertj:assertj-core'
+  testImplementation 'org.mockito:mockito-core'
+}
+
+test {
+  useJUnitPlatform()
+  // Log full stack traces (with causes) for failing tests; kork has no such convention. Forward
+  // the tests' own stdout/logging so long runs (e.g. the benchmark) show progress live.
+  testLogging {
+    exceptionFormat = 'full'
+    showStackTraces = true
+    showCauses = true
+    showStandardStreams = true
+  }
+  // Forward -Dzanzibar.* (benchmark gate + scale/benchmark knobs) from the Gradle CLI to the forked
+  // test JVM, which does not inherit them. Resolved via the provider API so the configuration cache
+  // invalidates when these change.
+  providers.systemPropertiesPrefixedBy("zanzibar.").get().each { name, value ->
+    systemProperty(name, value)
+  }
+}

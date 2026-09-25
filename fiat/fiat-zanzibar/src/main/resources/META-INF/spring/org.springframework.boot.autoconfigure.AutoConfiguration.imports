@@ -1,0 +1,5 @@
+com.netflix.spinnaker.fiat.zanzibar.FiatZanzibarConfig
+com.netflix.spinnaker.fiat.zanzibar.FiatZanzibarSyncConfig
+com.netflix.spinnaker.fiat.zanzibar.resource.FiatZanzibarTypesConfig
+com.netflix.spinnaker.fiat.zanzibar.engine.OpenFgaEngineConfig
+com.netflix.spinnaker.fiat.zanzibar.engine.SpiceDbEngineConfig

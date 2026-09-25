@@ -49,7 +49,8 @@ class ServiceAccountsServiceSpec extends Specification {
     Optional.of(fiatService),
     fiatClientConfigurationProperties,
     fiatConfigurationProperties,
-    fiatPermissionsEvaluator
+    fiatPermissionsEvaluator,
+    Optional.empty()
   )
 
   def "should invalidate local cache"() {

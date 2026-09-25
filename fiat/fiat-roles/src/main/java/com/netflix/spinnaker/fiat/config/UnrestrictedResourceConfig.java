@@ -27,8 +27,9 @@ public class UnrestrictedResourceConfig {
 
   public static String UNRESTRICTED_USERNAME = "__unrestricted_user__";
 
+  // The store-backed repository builds this user from its sources on every read
   @Bean
-  @ConditionalOnExpression("${fiat.write-mode.enabled:true}")
+  @ConditionalOnExpression("${fiat.write-mode.enabled:true} and !${fiat.zanzibar.enabled:false}")
   String addUnrestrictedUser(PermissionsRepository permissionsRepository) {
     if (!permissionsRepository.get(UNRESTRICTED_USERNAME).isPresent()) {
       permissionsRepository.put(new UserPermission().setId(UNRESTRICTED_USERNAME));

@@ -116,4 +116,12 @@ public interface FiatService {
    */
   @DELETE("roles/{userId}")
   Call<Void> logoutUser(@Path("userId") String userId);
+
+  /** Publish changed resources, in Fiat's resource shape, to the store (Zanzibar mode). */
+  @POST("zanzibar/resources/{resourceType}")
+  Call<Void> resourcesChanged(@Path("resourceType") String resourceType, @Body List<?> resources);
+
+  /** Publish deleted resources by name (Zanzibar mode). */
+  @POST("zanzibar/resources/{resourceType}/delete")
+  Call<Void> resourcesDeleted(@Path("resourceType") String resourceType, @Body List<String> names);
 }

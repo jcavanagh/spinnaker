@@ -29,6 +29,7 @@ dependencies {
     implementation "io.spinnaker.kork:kork-sql"
     implementation "io.spinnaker.kork:kork-exceptions"
     implementation "io.spinnaker.kork:kork-web"
+    implementation "io.spinnaker.kork:kork-zanzibar"
 
     implementation "io.strikt:strikt-core"
     implementation "io.github.resilience4j:resilience4j-retry"
@@ -49,6 +50,27 @@ dependencies {
     testImplementation "org.testcontainers:testcontainers-postgresql"
     testImplementation "org.postgresql:postgresql"
 
+    // FiatBaselineBenchmark: the Redis backend and the production-shaped fixtures.
+    testImplementation "org.testcontainers:testcontainers"
+    testImplementation "io.spinnaker.kork:kork-jedis"
+    testImplementation "redis.clients:jedis"
+    testImplementation testFixtures(project(":fiat-core"))
+
     // Only used for Initializing Datasource. For actual CRUD, test containers preferred.
     testImplementation "com.h2database:h2"
+}
+
+test {
+    testLogging {
+        showStandardStreams = true
+    }
+    // Forward -Dfiat.* (FiatBaselineBenchmark gate + scale knobs) to the forked test JVM.
+    providers.systemPropertiesPrefixedBy("fiat.").get().each { name, value ->
+        systemProperty(name, value)
+    }
+    // -Dfiat.bench.heap sets -Xmx on the fork (the daemon's jvmargs do not reach it).
+    def benchHeap = providers.systemProperty("fiat.bench.heap").getOrNull()
+    if (benchHeap) {
+        maxHeapSize = benchHeap
+    }
 }

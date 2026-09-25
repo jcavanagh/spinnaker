@@ -91,11 +91,10 @@ internal fun DSLContext.flushAll() {
                 .schemas
                 .filter { it.name == schema }
                 .flatMap(Schema::getTables)
-                .filterNot {
-                    it.name in setOf(
-                        databaseChangeLogTableName,
-                        databaseChangeLogLockTableName
-                    )
+                .filterNot { table ->
+                    // Postgres folds Liquibase's upper-case table names to lower case.
+                    listOf(databaseChangeLogTableName, databaseChangeLogLockTableName)
+                        .any { it.equals(table.name, ignoreCase = true) }
                 }
                 .forEach {
                     when (configuration().family()) {

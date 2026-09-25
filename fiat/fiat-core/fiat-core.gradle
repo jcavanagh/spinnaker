@@ -1,4 +1,7 @@
+apply plugin: 'java-test-fixtures'
+
 dependencies {
+  testFixturesImplementation enforcedPlatform("io.spinnaker.kork:kork-bom")
 
   api "org.springframework.security:spring-security-core"
 

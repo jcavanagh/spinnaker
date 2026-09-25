@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Test logging: keep the benchmark's progress + container startup visible, everything else quiet.
+     kork-zanzibar's log4j2 API calls route through log4j-to-slf4j into logback, so this config
+     controls them. -->
+<configuration>
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} %-5level %logger{0} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- Benchmark ingest progress and latency reports. -->
+  <logger name="com.netflix.spinnaker.kork.zanzibar" level="INFO"/>
+  <!-- Container pull/startup progress for the docker-gated tests. -->
+  <logger name="org.testcontainers" level="INFO"/>
+  <logger name="tc" level="INFO"/>
+  <!-- Forwarded stdout/stderr of the engine containers (crash/panic/OOM reasons). -->
+  <logger name="container" level="INFO"/>
+
+  <root level="WARN">
+    <appender-ref ref="STDOUT"/>
+  </root>
+</configuration>

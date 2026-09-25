@@ -31,8 +31,10 @@ import com.netflix.spinnaker.clouddriver.security.AccountSecurityPolicy;
 import com.netflix.spinnaker.clouddriver.security.AllowAllAccountSecurityPolicy;
 import com.netflix.spinnaker.clouddriver.security.AuthorizedRolesExtractor;
 import com.netflix.spinnaker.clouddriver.security.DefaultAccountSecurityPolicy;
+import com.netflix.spinnaker.clouddriver.security.FiatAccountDefinitionPublisher;
 import com.netflix.spinnaker.credentials.definition.CredentialsDefinition;
 import com.netflix.spinnaker.fiat.shared.FiatPermissionEvaluator;
+import com.netflix.spinnaker.fiat.shared.FiatResourceEvents;
 import com.netflix.spinnaker.kork.secrets.SecretManager;
 import com.netflix.spinnaker.kork.secrets.SecretSession;
 import com.netflix.spinnaker.kork.secrets.user.UserSecretManager;
@@ -41,6 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import lombok.Data;
@@ -115,8 +118,17 @@ public class AccountDefinitionConfiguration {
       AccountDefinitionSecretManager secretManager,
       AccountCredentialsProvider provider,
       AccountSecurityPolicy security,
-      List<AuthorizedRolesExtractor> extractors) {
-    return new AccountDefinitionService(repository, secretManager, provider, security, extractors);
+      List<AuthorizedRolesExtractor> extractors,
+      Optional<FiatAccountDefinitionPublisher> fiatPublisher) {
+    return new AccountDefinitionService(
+        repository, secretManager, provider, security, extractors, fiatPublisher);
+  }
+
+  @Bean
+  @ConditionalOnProperty("services.fiat.resource-events.enabled")
+  public FiatAccountDefinitionPublisher fiatAccountDefinitionPublisher(
+      FiatResourceEvents fiatResourceEvents, ObjectMapper mapper) {
+    return new FiatAccountDefinitionPublisher(fiatResourceEvents, mapper);
   }
 
   @Bean

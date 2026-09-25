@@ -1,0 +1,36 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-zanzibar-consistency-token-table
+      author: Joe Cavanagh
+      changes:
+        - createTable:
+            tableName: fiat_zanzibar_consistency_token
+            columns:
+              - column:
+                  name: store_key
+                  type: varchar(255)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: token
+                  type: varchar(1024)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: token_order
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: bigint
+                  constraints:
+                    nullable: false
+        - modifySql:
+            dbms: mysql
+            append:
+              value: " engine innodb DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci"
+      rollback:
+        - dropTable:
+            tableName: fiat_zanzibar_consistency_token

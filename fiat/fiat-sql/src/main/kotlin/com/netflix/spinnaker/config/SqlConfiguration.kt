@@ -20,10 +20,12 @@ import com.netflix.spectator.api.Registry
 import com.netflix.spinnaker.fiat.model.resources.Resource
 import com.netflix.spinnaker.fiat.permissions.PermissionsRepository
 import com.netflix.spinnaker.fiat.permissions.SqlPermissionsRepository
+import com.netflix.spinnaker.fiat.permissions.SqlSharedConsistencyTokens
 import com.netflix.spinnaker.kork.dynamicconfig.DynamicConfigService
 import com.netflix.spinnaker.kork.sql.config.DefaultSqlConfiguration
 import com.netflix.spinnaker.kork.sql.config.SqlProperties
 import com.netflix.spinnaker.kork.telemetry.InstrumentedProxy
+import com.netflix.spinnaker.kork.zanzibar.consistency.SharedConsistencyTokens
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.newFixedThreadPoolContext
 import kotlinx.coroutines.slf4j.MDCContext
@@ -102,4 +104,8 @@ class SqlConfiguration {
             ) as PermissionsRepository
         }
     }
+
+    @Bean
+    fun sqlSharedConsistencyTokens(jooq: DSLContext): SharedConsistencyTokens =
+        SqlSharedConsistencyTokens(jooq)
 }

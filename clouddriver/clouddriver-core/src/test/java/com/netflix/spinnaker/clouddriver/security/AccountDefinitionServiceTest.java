@@ -28,6 +28,7 @@ import com.netflix.spinnaker.kork.secrets.user.UserSecret;
 import com.netflix.spinnaker.kork.web.exceptions.InvalidRequestException;
 import io.spinnaker.test.security.ValueAccount;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,7 +55,12 @@ public class AccountDefinitionServiceTest {
     List<AuthorizedRolesExtractor> extractors = List.of(extractor);
     accountDefinitionService =
         new AccountDefinitionService(
-            repository, secretManager, accountCredentialsProvider, policy, extractors);
+            repository,
+            secretManager,
+            accountCredentialsProvider,
+            policy,
+            extractors,
+            Optional.empty());
 
     doReturn(true).when(extractor).supportsType(definition.getClass());
   }
