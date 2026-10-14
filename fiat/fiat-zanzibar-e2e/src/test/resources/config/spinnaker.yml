@@ -1,0 +1,30 @@
+# Shared by every service. e2e.* values are system properties set by ZanzibarStack.
+services:
+  fiat:
+    enabled: true
+    baseUrl: http://localhost:${e2e.port.fiat}
+  front50:
+    baseUrl: http://localhost:${e2e.port.front50}
+  clouddriver:
+    baseUrl: http://localhost:${e2e.port.clouddriver}
+  gate:
+    baseUrl: http://localhost:${e2e.port.gate}
+  orca:
+    baseUrl: http://localhost:${e2e.port.orca}
+  igor:
+    enabled: true
+    baseUrl: http://localhost:${e2e.port.igor}
+  echo:
+    enabled: true
+    baseUrl: http://localhost:${e2e.port.echo}
+  redis:
+    baseUrl: ${e2e.redis.url}
+  rosco:
+    enabled: false
+  keel:
+    enabled: false
+  kayenta:
+    enabled: false
+
+redis:
+  connection: ${e2e.redis.url}

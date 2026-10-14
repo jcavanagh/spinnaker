@@ -1,0 +1,20 @@
+fiat:
+  zanzibar:
+    enabled: true
+    spicedb:
+      host: ${e2e.spicedb.host}
+      port: ${e2e.spicedb.port}
+      preshared-key: ${e2e.spicedb.key}
+  admin:
+    roles:
+      - e2e-admins
+  account:
+    manager:
+      roles:
+        - e2e-account-managers
+
+auth:
+  group-membership:
+    service: file
+    file:
+      path: ${e2e.roles.file}

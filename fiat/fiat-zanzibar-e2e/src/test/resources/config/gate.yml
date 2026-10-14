@@ -1,0 +1,6 @@
+header:
+  enabled: true
+
+fiat:
+  session-filter:
+    enabled: false

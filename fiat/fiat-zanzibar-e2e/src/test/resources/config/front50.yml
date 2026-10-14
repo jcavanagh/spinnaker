@@ -1,0 +1,17 @@
+sql:
+  enabled: true
+  connectionPools:
+    default:
+      default: true
+      jdbcUrl: jdbc:mysql://${e2e.mysql.host}:${e2e.mysql.port}/front50?useSSL=false&allowPublicKeyRetrieval=true
+      user: root
+      password: root
+  migration:
+    jdbcUrl: jdbc:mysql://${e2e.mysql.host}:${e2e.mysql.port}/front50?useSSL=false&allowPublicKeyRetrieval=true
+    user: root
+    password: root
+
+services:
+  fiat:
+    resource-events:
+      enabled: true

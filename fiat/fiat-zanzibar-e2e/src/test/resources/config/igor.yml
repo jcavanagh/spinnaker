@@ -1,0 +1,16 @@
+# Build services reach the store through Fiat's bootstrap. The masters do not exist; only their
+# permissions matter here.
+jenkins:
+  enabled: true
+  masters:
+    - name: e2e-jenkins-open
+      address: http://127.0.0.1:1
+      username: e2e
+      password: e2e
+    - name: e2e-jenkins-eng
+      address: http://127.0.0.1:1
+      username: e2e
+      password: e2e
+      permissions:
+        READ: [e2e-eng]
+        WRITE: [e2e-eng]

@@ -1,0 +1,60 @@
+redis:
+  enabled: false
+
+sql:
+  enabled: true
+  connectionPools:
+    default:
+      default: true
+      jdbcUrl: jdbc:mysql://${e2e.mysql.host}:${e2e.mysql.port}/clouddriver?useSSL=false&allowPublicKeyRetrieval=true
+      user: root
+      password: root
+  migration:
+    jdbcUrl: jdbc:mysql://${e2e.mysql.host}:${e2e.mysql.port}/clouddriver?useSSL=false&allowPublicKeyRetrieval=true
+    user: root
+    password: root
+
+services:
+  fiat:
+    resource-events:
+      enabled: true
+
+account:
+  storage:
+    enabled: true
+    kubernetes:
+      enabled: true
+
+credentials:
+  poller:
+    enabled: true
+    types:
+      kubernetes:
+        reloadFrequencyMs: 2000
+
+# Static accounts reach the store through Fiat's bootstrap. The cluster does not exist; only the
+# accounts' permissions matter here.
+kubernetes:
+  enabled: true
+  accounts:
+    - name: e2e-k8s-open
+      kubeconfigFile: ${e2e.config.dir}/kubeconfig.yml
+      namespaces: [default]
+      checkPermissionsOnStartup: false
+      cacheIntervalSeconds: 3600
+    - name: e2e-k8s-eng
+      kubeconfigFile: ${e2e.config.dir}/kubeconfig.yml
+      namespaces: [default]
+      checkPermissionsOnStartup: false
+      cacheIntervalSeconds: 3600
+      permissions:
+        READ: [e2e-eng]
+        WRITE: [e2e-eng]
+    - name: e2e-k8s-ops
+      kubeconfigFile: ${e2e.config.dir}/kubeconfig.yml
+      namespaces: [default]
+      checkPermissionsOnStartup: false
+      cacheIntervalSeconds: 3600
+      permissions:
+        READ: [e2e-ops, e2e-eng]
+        WRITE: [e2e-ops]

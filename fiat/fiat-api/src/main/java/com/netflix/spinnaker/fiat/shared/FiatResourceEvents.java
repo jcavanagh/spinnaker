@@ -58,7 +58,9 @@ public class FiatResourceEvents implements DisposableBean {
     publish(
         resourceType,
         resources.size(),
-        () -> Retrofit2SyncCall.execute(fiatService.resourcesChanged(resourceType, resources)));
+        () ->
+            Retrofit2SyncCall.execute(
+                fiatService.resourcesChanged(resourceType, List.copyOf(resources))));
   }
 
   public void deleted(String resourceType, List<String> names) {
