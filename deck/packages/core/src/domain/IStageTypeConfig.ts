@@ -39,6 +39,7 @@ export interface IStageTypeConfig extends IStageOrTriggerTypeConfig {
   cloudProviders?: string[];
   configAccountExtractor?: (stage: IStage) => string[];
   configuration?: any;
+  // Filled into missing stage values before the stage editor mounts
   defaults?: any;
   disableNotifications?: boolean;
   executionDetailsComponent?: React.ComponentType<IExecutionDetailsComponentProps>;

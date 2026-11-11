@@ -343,7 +343,7 @@ function PipelineStageConfig({
 }: IPipelineStageConfigProps) {
   const [providerSelectionError, setProviderSelectionError] = React.useState('');
   const [stageRoleOptions, setStageRoleOptions] = React.useState<any[]>([]);
-  const lastAppliedDefaultsKey = React.useRef<string>();
+  const [appliedDefaultsKey, setAppliedDefaultsKey] = React.useState<string>();
   const canResolveStageTypes = accounts !== null && accounts.length > 0 && !accountLoadError;
   // Registry lookups copy every stage type, so only repeat them when their inputs change
   const configurableStageTypes = React.useMemo(
@@ -456,15 +456,17 @@ function PipelineStageConfig({
   }, [inferredProvider, inferredProviderConfig, stage, stageFieldUpdated]);
 
   const defaultsKey = `${stage.refId || ''}:${stage.type || ''}:${selectedProvider || ''}`;
-  React.useEffect(() => {
-    if (!config || providerFieldsIncoherent || lastAppliedDefaultsKey.current === defaultsKey) {
+  const defaultsApplied = !config || appliedDefaultsKey === defaultsKey;
+  // Runs before paint, so the stage editor first renders with the defaults on the stage
+  React.useLayoutEffect(() => {
+    if (defaultsApplied) {
       return;
     }
-    lastAppliedDefaultsKey.current = defaultsKey;
+    setAppliedDefaultsKey(defaultsKey);
     if (applyStageConfigDefaults(stage, config)) {
       stageFieldUpdated();
     }
-  }, [config, defaultsKey, providerFieldsIncoherent, stage, stageFieldUpdated]);
+  }, [config, defaultsApplied, defaultsKey, stage, stageFieldUpdated]);
 
   const accountState = accountLoadError ? (
     <div className="alert alert-danger">Could not load application accounts: {accountLoadError.message}</div>
@@ -550,6 +552,10 @@ function PipelineStageConfig({
   const renderStageDetails = () => {
     if (!stage.type) {
       return <p className="small">Select a stage type to configure this stage.</p>;
+    }
+    // Stage editors read the stage when they mount, so they wait for its defaults
+    if (!defaultsApplied) {
+      return null;
     }
     const stageConfig = config?.component ? (
       <StageConfigWrapper

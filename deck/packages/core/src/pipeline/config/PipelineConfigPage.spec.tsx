@@ -1539,6 +1539,60 @@ describe('PipelineConfigPage', () => {
     expect(revision()).toBe(1);
   });
 
+  it('applies registry defaults before a stage editor that copies the stage mounts', async () => {
+    const CopyingStageConfig = ({ stage }: { stage: any }) => {
+      const [copy] = React.useState(() => cloneDeep(stage));
+      return <div className="copied-source">{copy.source}</div>;
+    };
+    Registry.pipeline.registerStage({
+      key: 'copying',
+      label: 'Copying',
+      defaults: { source: 'text' },
+      component: CopyingStageConfig,
+    } as IStageTypeConfig);
+    const requested = pipeline('target-id', 'Requested Pipeline');
+    requested.stages = [{ refId: '1', name: 'Copying', type: 'copying', requisiteStageRefIds: [] } as any];
+    const app = createApp([requested]);
+    $stateParams.pipelineId = requested.id;
+    showStageConfig(requested.id);
+
+    renderPage(app);
+    await waitForPipeline('Requested Pipeline');
+
+    await waitFor(() => expect(document.querySelector('.copied-source')).toHaveTextContent('text'));
+  });
+
+  it('applies registry defaults to a stage that has a cloud provider but no provider type', async () => {
+    const user = setupUser();
+    Registry.pipeline.registerStage({
+      key: 'providerScoped',
+      label: 'Provider Scoped',
+      cloudProvider: 'aws',
+      defaults: { source: 'text' },
+      component: RegularStageConfig,
+    } as IStageTypeConfig);
+    const requested = pipeline('target-id', 'Requested Pipeline');
+    requested.stages = [
+      {
+        refId: '1',
+        name: 'Provider Scoped',
+        type: 'providerScoped',
+        cloudProvider: 'aws',
+        requisiteStageRefIds: [],
+      } as any,
+    ];
+    const app = createApp([requested]);
+    $stateParams.pipelineId = requested.id;
+    showStageConfig(requested.id);
+
+    renderPage(app);
+    await waitForPipeline('Requested Pipeline');
+
+    expect(await screen.findByText('Regular stage config')).toBeInTheDocument();
+    const saved = await saveAndGetPipeline(user);
+    expect(saved.stages[0]).toEqual(expect.objectContaining({ source: 'text' }));
+  });
+
   it('preserves strategy stage type filtering after accounts load', async () => {
     const user = setupUser();
     Registry.pipeline.registerStage({ key: 'pipelineOnly', label: 'Pipeline Only' } as IStageTypeConfig);
